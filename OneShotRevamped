@@ -21,3 +21,5 @@ public class OneShotRevamped {
 		return Math.ceil(((((((playerLevel * 50) - (petLevel * 10)) / rubyMultiplier) / strengthMultiplier) / minWeaponDamage) * 4) - 4);
 	}
 }
+
+// EDIT LATER

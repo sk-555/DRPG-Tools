@@ -1,0 +1,64 @@
+package textonly;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.Scanner;
+
+/*
+ * Some credit:
+ * https://stackoverflow.com/questions/49293180/decimalformat-with-comma
+ * https://stackoverflow.com/questions/5054132/how-to-change-the-decimal-separator-of-decimalformat-from-comma-to-dot-point
+ */
+public class WeaponUpgrades {
+
+	static String suffix;
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter weapon name");
+		String wepName = sc.nextLine();
+		
+		System.out.println("Enter existing weapon upgrades");
+		int existingUpgrades = sc.nextInt();
+		sc.nextLine();
+		
+		System.out.println("Enter number of upgrades being applied");
+		int numUpgrade = (sc.nextInt()) + existingUpgrades;
+		sc.nextLine();
+		
+		int numUpgradeReal = numUpgrade - existingUpgrades;
+		
+		switch (numUpgradeReal) {
+			case 1:
+				suffix = "time";
+				break;
+			default:
+				suffix = "times";
+				break;			  
+		}
+		
+		System.out.println("Enter weapon minimum damage and weapon maximum damage, separated by a space.");
+		String value = sc.nextLine();
+		String[] values = value.split("\\s+");
+		int minDamage = Integer.parseInt(values[0]);
+		int maxDamage = Integer.parseInt(values[1]);
+		
+		double damageFormula = (minDamage + maxDamage) / 6.5;
+		
+		System.out.println("Your weapon " + wepName + " with " + existingUpgrades + " existing upgrades,\na minimum damage of " + minDamage
+				+ " and a maximum damage of " + maxDamage + " will be upgraded " + numUpgradeReal + " " + suffix);
+		
+		//DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+		//symbols.setDecimalSeparator(',');
+		//DecimalFormat format = new DecimalFormat("#,##0.00");
+		DecimalFormat format = new DecimalFormat("#,###");
+		
+		System.out.println("Total cost calculated: " + format.format(calculateCost(existingUpgrades, numUpgrade, damageFormula)));
+	}
+
+	static double calculateCost(int existingUpgrades, int numUpgrade, double damageFormula){
+		return Math.floor(damageFormula * 50 * numUpgrade * (numUpgrade + 1) * (2 * numUpgrade + 1) / 6 + 500 * numUpgrade - 
+				(damageFormula * 50 * existingUpgrades * (existingUpgrades + 1) * (2 * existingUpgrades + 1) / 6 + 500 * existingUpgrades));
+	}
+}

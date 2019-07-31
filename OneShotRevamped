@@ -1,0 +1,23 @@
+package textonly;
+
+public class OneShotRevamped {
+
+	public static void main(String[] args) {
+		int minWeaponDamage = 1000;
+		int numUpgrades = 28;
+		double strengthMultiplier = 1.35;
+		double rubyMultiplier = 1.6;
+		int petLevel = 355;
+		int playerLevel = 423;
+		System.out.println(oneShotLevel(minWeaponDamage, numUpgrades, strengthMultiplier, rubyMultiplier, petLevel));
+		System.out.println(oneShotUpgrades(playerLevel, petLevel, rubyMultiplier, strengthMultiplier, minWeaponDamage));
+	}
+
+	public static double oneShotLevel(int minWeaponDamage, int numUpgrades, double strengthMultiplier, double rubyMultiplier, int petLevel) {
+		return Math.floor(((((minWeaponDamage * (1 + (0.25 * numUpgrades))) * strengthMultiplier * rubyMultiplier) + (petLevel * 10)) / 50));
+	}
+	
+	public static double oneShotUpgrades(int playerLevel, int petLevel, double rubyMultiplier, double strengthMultiplier, int minWeaponDamage) {
+		return Math.ceil(((((((playerLevel * 50) - (petLevel * 10)) / rubyMultiplier) / strengthMultiplier) / minWeaponDamage) * 4) - 4);
+	}
+}

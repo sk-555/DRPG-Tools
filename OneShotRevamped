@@ -1,25 +1,96 @@
 package textonly;
 
+import java.text.DecimalFormat;
+
+// Regex split error (String.valueOf(decimalDouble)): https://stackoverflow.com/questions/13460595/using-string-split-with-a-decimal-not-working
+
 public class OneShotRevamped {
 
 	public static void main(String[] args) {
+		DecimalFormat numberFormat = new DecimalFormat("#,###");
+		
+		// Player statistics
 		int minWeaponDamage = 1000;
-		int numUpgrades = 28;
+		int maxWeaponDamage = 1100;
+		int numUpgrades = 29;
+		double rubyMultiplier = 1.55;
 		double strengthMultiplier = 1.35;
-		double rubyMultiplier = 1.6;
-		int petLevel = 355;
+		int petLevel = 376;
 		int playerLevel = 423;
-		System.out.println(oneShotLevel(minWeaponDamage, numUpgrades, strengthMultiplier, rubyMultiplier, petLevel));
-		System.out.println(oneShotUpgrades(playerLevel, petLevel, rubyMultiplier, strengthMultiplier, minWeaponDamage));
-	}
+		
+		// Retrieve values from functions.
+		double oneShotLevel = oneShotLevel(minWeaponDamage, numUpgrades, strengthMultiplier, rubyMultiplier, petLevel);
+		double oneShotUpgrades = oneShotUpgrades(playerLevel, petLevel, rubyMultiplier, strengthMultiplier, minWeaponDamage);
+		
+		System.out.println("One-shot level: " + numberFormat.format(oneShotLevel));
+		System.out.println("Total upgrades for one-shotting: " + numberFormat.format(oneShotUpgrades));
+		
+		double damageFormula = (minWeaponDamage + maxWeaponDamage) / 6.5;
+		int requiredUpgrades;
+		double weaponUpgradeCost;
+		
+		requiredUpgrades = (int) (oneShotUpgrades - numUpgrades);
 
-	public static double oneShotLevel(int minWeaponDamage, int numUpgrades, double strengthMultiplier, double rubyMultiplier, int petLevel) {
-		return Math.floor(((((minWeaponDamage * (1 + (0.25 * numUpgrades))) * strengthMultiplier * rubyMultiplier) + (petLevel * 10)) / 50));
+		// Print out a report to the user.
+		System.out.println("Required upgrades: " + requiredUpgrades);
+		
+		// Necessary for the actual calculation, might not be the best way of organizing the code structure; for cleanup later though.
+		requiredUpgrades += numUpgrades;		
+		
+		weaponUpgradeCost = weaponUpgradeCost(numUpgrades, requiredUpgrades, damageFormula);
+		System.out.println("Upgrade cost: " + numberFormat.format(weaponUpgradeCost));
+		System.out.println("Strength required: " + (numberFormat.format(oneShotUpgrades * 15)));
+		
+		System.out.println("-------------------");
+		System.out.println("Player Stats");
+		System.out.println("-------------------");
+		System.out.println("Player Level " + playerLevel + " (Mob HP: " + (playerLevel * 50) + ") | Pet Level " + petLevel + " (" + (petLevel * 10) + " damage)");
+		System.out.println("Player weapon: " + minWeaponDamage + " - " + maxWeaponDamage + " damage (" + numUpgrades + " upgrades)");
+		System.out.println("Ruby Multiplier: " + rubyMultiplier);
+
+		/* Dumb way of using a switch because I'm bored, would probably just be better to use if statements but...
+		 * It's actually very silly. Converting to a string to an integer... why not just use a case with strings! Oh well.
+		 * Or why not just use if statements. */
+		
+		// Maybe I can find a better way to combine Beer + Ring of Strength with falling cases, for now it's fine I guess
+		// Either way this solution is ridiculous 
+		
+		StringBuilder strengthMultiplierSuffix = new StringBuilder(" ");
+		switch(Integer.parseInt((String.valueOf(strengthMultiplier).split("\\.")[1]))) {
+			case 0: strengthMultiplierSuffix.append("(Default)");
+					break;
+			case 25: strengthMultiplierSuffix.append("(Ring of Strength)");
+					break;
+			case 35: strengthMultiplierSuffix.append("(Beer Potion)");
+					break;
+			// Support "1.6" or "1.60" for the combined multiplier. Look into stripping trailing zeros for the future
+			case 6:
+			case 60: strengthMultiplierSuffix.append("(Ring of Strength) (Beer Potion)");
+					break;
+			default: strengthMultiplierSuffix.append("(Miscellaneous Combination)");
+					break;
+		}	
+		
+		System.out.println("Strength Multiplier: " + strengthMultiplier + strengthMultiplierSuffix);
+		System.out.println("[Total gold spent on player weapon upgrades: " + numberFormat.format(weaponUpgradeCost(0, numUpgrades, damageFormula)) + "]");
+		System.out.println("-------------------");
+		
 	}
 	
-	public static double oneShotUpgrades(int playerLevel, int petLevel, double rubyMultiplier, double strengthMultiplier, int minWeaponDamage) {
+	// Use rounding for consistency
+
+	static double oneShotLevel(int minWeaponDamage, int numUpgrades, double strengthMultiplier, double rubyMultiplier, int petLevel) {
+		// Level up to which the player can one-shot, given specified stats (rounded). Affected: enemy mob levels.
+		return Math.floor(((((minWeaponDamage * (1 + (0.25 * numUpgrades))) * strengthMultiplier * rubyMultiplier) + (petLevel * 10)) / 50));
+	}
+
+	static double oneShotUpgrades(int playerLevel, int petLevel, double rubyMultiplier, double strengthMultiplier, int minWeaponDamage) {
+		// Number of upgrades necessary for one-shotting, given specified stats, up to the current player level (rounded).
 		return Math.ceil(((((((playerLevel * 50) - (petLevel * 10)) / rubyMultiplier) / strengthMultiplier) / minWeaponDamage) * 4) - 4);
 	}
+	
+	static double weaponUpgradeCost(int existingUpgrades, int numUpgrade, double damageFormula){
+		return Math.floor(damageFormula * 50 * numUpgrade * (numUpgrade + 1) * (2 * numUpgrade + 1) / 6 + 500 * numUpgrade - 
+				(damageFormula * 50 * existingUpgrades * (existingUpgrades + 1) * (2 * existingUpgrades + 1) / 6 + 500 * existingUpgrades));
+	}
 }
-
-// EDIT LATER
